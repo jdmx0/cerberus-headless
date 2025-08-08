@@ -6,6 +6,7 @@ import { createFetchRenderTool } from './tools/fetchRender.js';
 import { createExtractContentTool } from './tools/extractContent.js';
 import { createScreenshotTool } from './tools/screenshot.js';
 import { createPdfTool } from './tools/pdf.js';
+import { createVideoTool } from './tools/video.js';
 import { createGetLinksTool } from './tools/getLinks.js';
 import { createEvaluateTool } from './tools/evaluate.js';
 import { createMetaTool } from './tools/meta.js';
@@ -21,7 +22,10 @@ type ToolSpec = {
 };
 
 const config = loadConfig();
-const logger = pino({ level: config.LOG_LEVEL, redact: { paths: ['headers.authorization', 'SUPABASE_SERVICE_ROLE'], censor: '[REDACTED]' } });
+const logger = pino({
+  level: config.LOG_LEVEL,
+  redact: { paths: ['headers.authorization', 'SUPABASE_SERVICE_ROLE'], censor: '[REDACTED]' },
+});
 const pool = new BrowserPool(config);
 
 // Register tools
@@ -30,6 +34,7 @@ tools.push(createFetchRenderTool(config, pool, logger));
 tools.push(createExtractContentTool(config, pool, logger));
 tools.push(createScreenshotTool(config, pool, logger));
 tools.push(createPdfTool(config, pool, logger));
+tools.push(createVideoTool(config, pool, logger));
 tools.push(createGetLinksTool(config, pool, logger));
 tools.push(createEvaluateTool(config, pool, logger));
 tools.push(createMetaTool(config, pool, logger));
@@ -40,7 +45,13 @@ tools.push(createSaveArtifactsTool(config, logger));
 const normalizeMethod = (method: string): string => {
   // Accept both slash and dot variants for compatibility with different MCP clients
   const m = method.replace(/\./g, '/');
-  if (m === 'tools/list' || m === 'tools/describe' || m === 'tools/call' || m === 'initialize' || m === 'notifications/initialized') {
+  if (
+    m === 'tools/list' ||
+    m === 'tools/describe' ||
+    m === 'tools/call' ||
+    m === 'initialize' ||
+    m === 'notifications/initialized'
+  ) {
     return m;
   }
   return method; // fallback
@@ -68,30 +79,32 @@ process.stdin.on('data', async (chunk) => {
           result = {
             protocolVersion: '2024-11-05',
             capabilities: {
-              tools: {}
+              tools: {},
             },
             serverInfo: {
               name: 'cerberus-mcp-headless',
-              version: '0.1.0'
-            }
+              version: '0.1.0',
+            },
           };
         } else if (method === 'tools/list' || method === 'tools.list') {
-          result = { tools: tools.map((t) => ({ 
-            name: t.name, 
-            description: `${t.name} tool for headless browser operations`
-          })) };
+          result = {
+            tools: tools.map((t) => ({
+              name: t.name,
+              description: `${t.name} tool for headless browser operations`,
+            })),
+          };
         } else if (method === 'tools/describe' || method === 'tools.describe') {
           const name = params.name as string;
           const t = tools.find((x) => x.name === name);
           if (!t) throw new Error(`Tool not found: ${name}`);
-          result = { 
-            name: t.name, 
+          result = {
+            name: t.name,
             description: `${t.name} tool for headless browser operations`,
             inputSchema: {
-              type: "object",
+              type: 'object',
               properties: {},
-              required: []
-            }
+              required: [],
+            },
           };
         } else if (method === 'tools/call' || method === 'tools.call') {
           const name = params.name as string;
@@ -164,7 +177,10 @@ const server = http.createServer(async (req, res) => {
       name: t.name,
       description: `${t.name} tool for headless browser operations`,
     });
-  } else if (req.method === 'POST' && (req.url === '/tools/call' || req.url?.startsWith('/tools/call'))) {
+  } else if (
+    req.method === 'POST' &&
+    (req.url === '/tools/call' || req.url?.startsWith('/tools/call'))
+  ) {
     try {
       const body = await readBody(req);
       const name = body.name as string;
@@ -185,6 +201,3 @@ server.listen(config.PORT, () => {
   logger.info({ port: config.PORT }, 'mcp-headless listening');
   logger.info({ tools: tools.map((t) => t.name) }, 'registered tools');
 });
-
-
-

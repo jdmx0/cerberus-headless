@@ -1,19 +1,18 @@
-Cerberus mcp-headless
-=================================
+# Cerberus mcp-headless
 
 Playwright-powered Headless Browser MCP server for OSINT ingestion, enrichment, and verification. Provides safe, rate-limited, observable headless browsing primitives and optional artifact persistence to Supabase Storage.
 
 Quick start
 
-1) Requirements: Node 20+, npm
+1. Requirements: Node 20+, npm
 
-2) Install
+2. Install
 
 ```
 npm install
 ```
 
-3) Dev run
+3. Dev run
 
 ```
 npm run dev
@@ -26,10 +25,12 @@ Tool catalog
 See `docs/tools.md` for full schemas, example requests/responses, and notes.
 
 Registered tools:
+
 - headless.fetch_render
 - headless.extract_content
 - headless.screenshot
 - headless.pdf
+- headless.video
 - headless.get_links
 - headless.evaluate
 - headless.meta
@@ -52,6 +53,12 @@ PDF → `page.pdf` (bytes_base64)
 $resp = Invoke-RestMethod -Method Post -Uri 'http://localhost:7801/tools/call' -ContentType 'application/json' -Body (@{ name='headless.pdf'; input=@{ url='https://example.com'; print_background=$false; persist_artifacts=$false } } | ConvertTo-Json -Depth 8); [IO.File]::WriteAllBytes((Join-Path (Get-Location).Path 'page.pdf'), [Convert]::FromBase64String($resp.result.bytes_base64))
 ```
 
+Video → `page.webm` (bytes_base64)
+
+```powershell
+$resp = Invoke-RestMethod -Method Post -Uri 'http://localhost:7801/tools/call' -ContentType 'application/json' -Body (@{ name='headless.video'; input=@{ url='https://example.com'; duration_ms=5000; persist_artifacts=$false } } | ConvertTo-Json -Depth 8); [IO.File]::WriteAllBytes((Join-Path (Get-Location).Path 'page.webm'), [Convert]::FromBase64String($resp.result.bytes_base64))
+```
+
 Fetch+Render → `page.html`
 
 ```powershell
@@ -71,6 +78,7 @@ $resp = Invoke-RestMethod -Method Post -Uri 'http://localhost:7801/tools/call' -
 ```
 
 Notes
+
 - Set `persist_artifacts=$false` to receive inline `bytes_base64`; when `true`, URLs like `screenshot_url`/`pdf_url` are returned instead.
 - For advanced inputs and outputs, see `docs/tools.md` and `src/tools/types.ts`.
 
@@ -100,5 +108,3 @@ docker run --rm -p 7801:7801 --env-file .env cerberus/mcp-headless
 License
 
 Apache-2.0
-
-
