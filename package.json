@@ -1,0 +1,55 @@
+{
+  "name": "cerberus-mcp-headless",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright-powered Headless Browser MCP server for OSINT ingestion.",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsup src/server.ts --format esm --dts --sourcemap --out-dir dist --clean",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:e2e": "vitest run -c vitest.e2e.config.ts",
+    "postinstall": "playwright install chromium || true",
+    "prepare": "husky install"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.8.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.50.0",
+    "@opentelemetry/resources": "^1.8.0",
+    "@opentelemetry/sdk-node": "^0.50.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "bottleneck": "^2.19.5",
+    "dotenv": "^16.4.5",
+    "node-html-parser": "^6.1.10",
+    "pino": "^9.3.2",
+    "playwright": "^1.46.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.6.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-unused-imports": "^4.0.0",
+    "husky": "^9.1.5",
+    "prettier": "^3.3.3",
+    "tsup": "^8.2.4",
+    "tsx": "^4.16.2",
+    "typedoc": "^0.26.11",
+    "vitest": "^2.0.5",
+    "vite": "^5.4.0",
+    "typescript": "^5.5.4"
+  }
+}
+
+
+
