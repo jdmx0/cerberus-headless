@@ -12,7 +12,7 @@ The server logs registered tools and exposes a health endpoint on `PORT` (defaul
 
 ## Tools
 
-See [docs/tools.md](docs/tools.md) for detailed schemas and examples. Registered tools include:
+Registered tools include:
 
 - headless.fetch_render
 - headless.extract_content
